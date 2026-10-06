@@ -92,7 +92,9 @@ pipeline {
                     }
 
                     if (-not $backendProcess.HasExited) {
-                        Stop-Process -Id $backendProcess.Id -Force
+                        Write-Host "Stopping temporary backend process tree..."
+                        & taskkill.exe /PID $backendProcess.Id /T /F | Out-Host
+                        Start-Sleep -Seconds 2
                     }
                     throw "HostelGo backend did not become healthy on port 5000."
                 }
@@ -108,10 +110,11 @@ pipeline {
                 Write-Host "Offer negotiation smoke test passed."
 
                 if (-not $backendProcess.HasExited) {
-                    Write-Host "Stopping temporary backend process..."
-                    Stop-Process -Id $backendProcess.Id -Force
-                    Write-Host "Temporary backend stopped."
+                    Write-Host "Stopping temporary backend process tree..."
+                    & taskkill.exe /PID $backendProcess.Id /T /F | Out-Host
+                    Start-Sleep -Seconds 2
                 }
+                Write-Host "Temporary backend stopped."
             '''
         }
     }
