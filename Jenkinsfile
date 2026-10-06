@@ -88,6 +88,12 @@ pipeline {
                 }
 
                 Write-Host "Offer negotiation smoke test passed."
+
+                if (-not $backendProcess.HasExited) {
+                    Write-Host "Stopping temporary backend process..."
+                    Stop-Process -Id $backendProcess.Id -Force
+                    Write-Host "Temporary backend stopped."
+                }
             '''
         }
     }
@@ -103,19 +109,50 @@ pipeline {
             }
         }
 
-        stage('Docker image build') {
-            steps {
-                echo 'Building the existing Compose backend and frontend images.'
-                powershell '''
-                    $ErrorActionPreference = 'Stop'
-                    if (-not (Test-Path -LiteralPath $env:DOCKER_ENV_FILE -PathType Leaf)) {
-                        throw 'Required .env.docker file is missing from the Jenkins workspace.'
-                    }
-                    docker compose --env-file $env:DOCKER_ENV_FILE -f $env:COMPOSE_FILE build backend frontend
-                    if ($LASTEXITCODE -ne 0) { throw 'Docker Compose image build failed.' }
-                '''
-            }
+        stage('Prepare Docker environment') {
+    steps {
+        echo 'Preparing Docker environment file from Jenkins credentials.'
+
+        withCredentials([
+            string(credentialsId: 'hostelgo-mongodb-uri', variable: 'MONGO_SECRET'),
+            string(credentialsId: 'hostelgo-jwt-secret', variable: 'JWT_SECRET_SECRET')
+        ]) {
+            powershell '''
+                $ErrorActionPreference = 'Stop'
+
+                @"
+MONGODB_URI=$env:MONGO_SECRET
+JWT_SECRET=$env:JWT_SECRET_SECRET
+DOCKER_BIND_ADDRESS=127.0.0.1
+CLIENT_ORIGIN=http://localhost:8080
+VITE_API_URL=http://localhost:5000/api
+"@ | Set-Content -Path ".env.docker" -Encoding ascii
+
+                Write-Host ".env.docker created successfully."
+            '''
         }
+    }
+}
+
+stage('Docker image build') {
+    steps {
+        echo 'Building the existing Compose backend and frontend images.'
+
+        powershell '''
+            $ErrorActionPreference = 'Stop'
+
+            if (-not (Test-Path -LiteralPath ".env.docker" -PathType Leaf)) {
+                throw 'Required .env.docker file is missing from the Jenkins workspace.'
+            }
+
+            docker compose --env-file ".env.docker" -f "docker-compose.yml" build backend frontend
+
+            if ($LASTEXITCODE -ne 0) {
+                throw 'Docker Compose image build failed.'
+            }
+        '''
+    }
+}
 
         stage('Docker deployment') {
             steps {
@@ -162,4 +199,15 @@ pipeline {
             }
         }
     }
+
+post {
+    always {
+        powershell '''
+            if (Test-Path -LiteralPath ".env.docker") {
+                Remove-Item -LiteralPath ".env.docker" -Force
+                Write-Host ".env.docker removed from Jenkins workspace."
+            }
+        '''
+    }
+}
 }
