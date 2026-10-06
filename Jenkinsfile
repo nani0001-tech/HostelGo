@@ -41,10 +41,15 @@ pipeline {
 
                 Write-Host "Starting HostelGo backend..."
 
+                $backendStdout = Join-Path (Get-Location).Path "jenkins-backend-stdout.log"
+                $backendStderr = Join-Path (Get-Location).Path "jenkins-backend-stderr.log"
+
                 $backendProcess = Start-Process `
                     -FilePath "npm.cmd" `
                     -ArgumentList "start" `
                     -WorkingDirectory (Get-Location).Path `
+                    -RedirectStandardOutput $backendStdout `
+                    -RedirectStandardError $backendStderr `
                     -PassThru `
                     -WindowStyle Hidden
 
@@ -76,6 +81,16 @@ pipeline {
 
                 if (-not $healthy) {
                     Write-Host "Backend failed to start."
+                    if (Test-Path -LiteralPath $backendStdout) {
+                        Write-Host "===== Backend stdout ====="
+                        Get-Content -LiteralPath $backendStdout
+                    }
+
+                    if (Test-Path -LiteralPath $backendStderr) {
+                        Write-Host "===== Backend stderr ====="
+                        Get-Content -LiteralPath $backendStderr
+                    }
+
                     if (-not $backendProcess.HasExited) {
                         Stop-Process -Id $backendProcess.Id -Force
                     }
