@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         MONGODB_URI = credentials('hostelgo-mongodb-uri')
+        JWT_SECRET = credentials('hostelgo-jwt-secret')
         COMPOSE_FILE = 'docker-compose.yml'
         DOCKER_ENV_FILE = '.env.docker'
     }
