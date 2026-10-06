@@ -8,6 +8,7 @@ pipeline {
         DOCKER_ENV_FILE = '.env.docker'
         DOCKER_BIN = 'C:\\Users\\Aakash\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin'
         DOCKER_COMPOSE_BIN = 'C:\\Users\\Aakash\\.docker\\cli-plugins'
+        DOCKER_COMPOSE_EXE = 'C:\\Users\\Aakash\\.docker\\cli-plugins\\docker-compose.exe'
     }
 
     options {
@@ -146,13 +147,16 @@ stage('Docker image build') {
 
             Write-Host "Docker location: $env:DOCKER_BIN"
             docker --version
-            docker compose version
+            if (-not (Test-Path -LiteralPath $env:DOCKER_COMPOSE_EXE -PathType Leaf)) {
+                throw "Docker Compose executable was not found at $env:DOCKER_COMPOSE_EXE"
+            }
+            & $env:DOCKER_COMPOSE_EXE version
 
             if (-not (Test-Path -LiteralPath ".env.docker" -PathType Leaf)) {
                 throw 'Required .env.docker file is missing from the Jenkins workspace.'
             }
 
-            docker compose --env-file ".env.docker" -f "docker-compose.yml" build backend frontend
+            & $env:DOCKER_COMPOSE_EXE --env-file ".env.docker" -f "docker-compose.yml" build backend frontend
 
             if ($LASTEXITCODE -ne 0) {
                 throw 'Docker Compose image build failed.'
@@ -170,12 +174,15 @@ stage('Docker image build') {
 
                     Write-Host "Docker location: $env:DOCKER_BIN"
                     docker --version
-                    docker compose version
+                    if (-not (Test-Path -LiteralPath $env:DOCKER_COMPOSE_EXE -PathType Leaf)) {
+                        throw "Docker Compose executable was not found at $env:DOCKER_COMPOSE_EXE"
+                    }
+                    & $env:DOCKER_COMPOSE_EXE version
 
                     if (-not (Test-Path -LiteralPath $env:DOCKER_ENV_FILE -PathType Leaf)) {
                         throw 'Required .env.docker file is missing from the Jenkins workspace.'
                     }
-                    docker compose --env-file $env:DOCKER_ENV_FILE -f $env:COMPOSE_FILE up -d --remove-orphans backend frontend
+                    & $env:DOCKER_COMPOSE_EXE --env-file $env:DOCKER_ENV_FILE -f $env:COMPOSE_FILE up -d --remove-orphans backend frontend
                     if ($LASTEXITCODE -ne 0) { throw 'Docker Compose deployment failed.' }
                 '''
             }
