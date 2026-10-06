@@ -1,0 +1,32 @@
+.notifications-page { max-width: 900px; margin: 0 auto; }
+.notifications-heading { align-items: center; }
+.notifications-heading p { max-width: 500px; }
+.notification-list { width: 100%; max-width: 850px; margin: 0 auto; background: var(--paper); border: 1px solid #e8ede5; border-radius: 10px; overflow: hidden; }
+.notification-row { align-items: flex-start; min-width: 0; }
+.notification-unread { background: #f4f8f0; box-shadow: inset 3px 0 #83a477; }
+.notification-icon { margin-top: 1px; }
+.notification-copy { display: block; width: 100%; padding: 0; border: 0; background: transparent; text-align: left; font: inherit; overflow-wrap: anywhere; }
+.notification-content-button { color: inherit; cursor: pointer; border-radius: 4px; }
+.notification-content-button:disabled { cursor: wait; }
+.notification-copy strong { display: inline-block; margin-right: 8px; }
+.notification-unread-label { display: inline-block; padding: 3px 7px; border-radius: 10px; background: #e4efdd; color: #4c7048; font-size: 9px; font-weight: 700; vertical-align: 1px; }
+.notification-copy p { margin: 5px 0; color: #657568; font-size: 11px; line-height: 1.6; white-space: pre-wrap; }
+.notification-copy time { display: block; color: #919b91; font-size: 10px; }
+.notification-open-label { display: block; margin-top: 7px; color: var(--green); font-size: 10px; font-weight: 700; }
+.notification-pagination { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 19px auto 0; color: #788579; font-size: 11px; }
+.notification-pagination .button { min-width: 90px; }
+.mark-all-button { min-height: 42px; }
+.notifications-page > .error-message { max-width: 850px; margin: 0 auto 14px; }
+.notifications-page > .empty-state { max-width: 850px; margin: 0 auto; }
+
+@media(max-width:600px) {
+  .notifications-page { padding-top: 30px; }
+  .notifications-heading { align-items: stretch; }
+  .mark-all-button { width: 100%; min-height: 46px; }
+  .notification-list { border-radius: 8px; }
+  .notification-row { gap: 10px; padding: 14px 12px; }
+  .notification-icon { width: 31px; height: 31px; }
+  .notification-open-label { margin-top: 8px; }
+  .notification-pagination { gap: 9px; }
+  .notification-pagination .button { min-width: 76px; padding: 9px 10px; }
+}

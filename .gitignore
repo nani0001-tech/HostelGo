@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+.env.docker
+.env.docker.*
+!.env.example
+!.env.docker.example
+npm-debug.log*
