@@ -6,6 +6,7 @@ pipeline {
         JWT_SECRET = credentials('hostelgo-jwt-secret')
         COMPOSE_FILE = 'docker-compose.yml'
         DOCKER_ENV_FILE = '.env.docker'
+        DOCKER_BIN = 'C:\\Users\\Aakash\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin'
     }
 
     options {
@@ -140,6 +141,11 @@ stage('Docker image build') {
 
         powershell '''
             $ErrorActionPreference = 'Stop'
+            $env:Path = "$env:DOCKER_BIN;$env:Path"
+
+            Write-Host "Docker location: $env:DOCKER_BIN"
+            docker --version
+            docker compose version
 
             if (-not (Test-Path -LiteralPath ".env.docker" -PathType Leaf)) {
                 throw 'Required .env.docker file is missing from the Jenkins workspace.'
@@ -159,6 +165,12 @@ stage('Docker image build') {
                 echo 'Deploying the existing Compose frontend and backend services.'
                 powershell '''
                     $ErrorActionPreference = 'Stop'
+                    $env:Path = "$env:DOCKER_BIN;$env:Path"
+
+                    Write-Host "Docker location: $env:DOCKER_BIN"
+                    docker --version
+                    docker compose version
+
                     if (-not (Test-Path -LiteralPath $env:DOCKER_ENV_FILE -PathType Leaf)) {
                         throw 'Required .env.docker file is missing from the Jenkins workspace.'
                     }
