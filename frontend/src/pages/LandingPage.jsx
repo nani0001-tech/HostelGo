@@ -19,7 +19,7 @@ export default function LandingPage() {
       <section className="landing-hero">
         <div className="hero-copy">
           <span className="eyebrow"><span className="eyebrow-star">✳</span> THE HOSTEL COMMUNITY MARKETPLACE</span>
-          <h1>Need a hand?<br /><em>Ask your people.</em></h1>
+          <h1>Need a hands?<br /><em>Ask your people.</em></h1>
           <p>The little things are easier together. Get everyday essentials from someone right around the corner.</p>
           <div className="hero-actions"><Link className="button button-primary" to={isAuthenticated ? '/requests' : '/register'}>{isAuthenticated ? 'Explore requests' : 'Get started'} <span>↗</span></Link><Link className="hero-secondary" to="/requests">Browse requests</Link></div>
           <div className="hero-trust"><span className="avatar-stack"><i>A</i><i>R</i><i>S</i></span> Made for hostel life</div>
