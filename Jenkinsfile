@@ -6,7 +6,7 @@ pipeline {
         COMPOSE_FILE = 'docker-compose.yml'
         DOCKER_ENV_FILE = '.env.docker'
     }
-    
+
     options {
         skipDefaultCheckout(true)
         disableConcurrentBuilds()
@@ -26,14 +26,71 @@ pipeline {
         }
 
         stage('Backend validation/test') {
-            steps {
-                echo 'Installing backend dependencies and running its offer negotiation smoke test.'
-                dir('backend') {
-                    powershell 'npm ci'
-                    powershell 'npm run test:offers'
+    steps {
+        echo 'Installing backend dependencies, starting the API, and running its offer negotiation smoke test.'
+
+        dir('backend') {
+            powershell 'npm ci'
+
+            powershell '''
+                $ErrorActionPreference = 'Stop'
+
+                Write-Host "Starting HostelGo backend..."
+
+                $backendProcess = Start-Process `
+                    -FilePath "npm.cmd" `
+                    -ArgumentList "start" `
+                    -WorkingDirectory (Get-Location).Path `
+                    -PassThru `
+                    -WindowStyle Hidden
+
+                Write-Host "Backend process started with PID $($backendProcess.Id)"
+
+                Write-Host "Waiting for HostelGo API on port 5000..."
+
+                $healthy = $false
+
+                for ($attempt = 1; $attempt -le 24; $attempt++) {
+                    try {
+                        $response = Invoke-WebRequest `
+                            -Uri "http://localhost:5000/api/health" `
+                            -Method Get `
+                            -TimeoutSec 5 `
+                            -UseBasicParsing
+
+                        if ($response.StatusCode -ge 200 -and $response.StatusCode -lt 400) {
+                            Write-Host "HostelGo backend is running successfully."
+                            $healthy = $true
+                            break
+                        }
+                    }
+                    catch {
+                        Write-Host "Backend not ready yet. Attempt $attempt/24..."
+                        Start-Sleep -Seconds 5
+                    }
                 }
-            }
+
+                if (-not $healthy) {
+                    Write-Host "Backend failed to start."
+                    if (-not $backendProcess.HasExited) {
+                        Stop-Process -Id $backendProcess.Id -Force
+                    }
+                    throw "HostelGo backend did not become healthy on port 5000."
+                }
+
+                Write-Host "Running offer negotiation smoke test..."
+
+                npm run test:offers
+
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Offer negotiation smoke test failed."
+                }
+
+                Write-Host "Offer negotiation smoke test passed."
+            '''
         }
+    }
+}
 
         stage('Frontend build/test') {
             steps {
