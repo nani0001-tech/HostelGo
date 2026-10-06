@@ -62,7 +62,7 @@ pipeline {
                 for ($attempt = 1; $attempt -le 24; $attempt++) {
                     try {
                         $response = Invoke-WebRequest `
-                            -Uri "http://localhost:5001/api/health" `
+                            -Uri "http://127.0.0.1:5000/api/health" `
                             -Method Get `
                             -TimeoutSec 5 `
                             -UseBasicParsing
@@ -209,7 +209,7 @@ stage('Docker image build') {
                 powershell '''
                     $ErrorActionPreference = 'Stop'
                     $checks = @(
-                        @{ Name = 'Backend'; Url = 'http://localhost:5000/api/health' },
+                        @{ Name = 'Backend'; Url = 'http://127.0.0.1:5001/api/health' },
                         @{ Name = 'Frontend'; Url = 'http://localhost:8080/' }
                     )
                     foreach ($check in $checks) {
