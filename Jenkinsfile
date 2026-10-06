@@ -57,7 +57,7 @@ pipeline {
                 for ($attempt = 1; $attempt -le 24; $attempt++) {
                     try {
                         $response = Invoke-WebRequest `
-                            -Uri "http://localhost:5000/api/health" `
+                            -Uri "http://localhost:5001/api/health" `
                             -Method Get `
                             -TimeoutSec 5 `
                             -UseBasicParsing
@@ -128,7 +128,7 @@ MONGODB_URI=$env:MONGO_SECRET
 JWT_SECRET=$env:JWT_SECRET_SECRET
 DOCKER_BIND_ADDRESS=127.0.0.1
 CLIENT_ORIGIN=http://localhost:8080
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5001/api
 "@ | Set-Content -Path ".env.docker" -Encoding ascii
 
                 Write-Host ".env.docker created successfully."
