@@ -1,15 +1,16 @@
 pipeline {
     agent any
 
+    environment {
+        MONGODB_URI = credentials('hostelgo-mongodb-uri')
+        COMPOSE_FILE = 'docker-compose.yml'
+        DOCKER_ENV_FILE = '.env.docker'
+    }
+    
     options {
         skipDefaultCheckout(true)
         disableConcurrentBuilds()
         timestamps()
-    }
-
-    environment {
-        COMPOSE_FILE = 'docker-compose.yml'
-        DOCKER_ENV_FILE = '.env.docker'
     }
 
     stages {
