@@ -7,6 +7,7 @@ pipeline {
         COMPOSE_FILE = 'docker-compose.yml'
         DOCKER_ENV_FILE = '.env.docker'
         DOCKER_BIN = 'C:\\Users\\Aakash\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin'
+        DOCKER_COMPOSE_BIN = 'C:\\Users\\Aakash\\.docker\\cli-plugins'
     }
 
     options {
@@ -141,7 +142,7 @@ stage('Docker image build') {
 
         powershell '''
             $ErrorActionPreference = 'Stop'
-            $env:Path = "$env:DOCKER_BIN;$env:Path"
+            $env:Path = "$env:DOCKER_BIN;$env:DOCKER_COMPOSE_BIN;$env:Path"
 
             Write-Host "Docker location: $env:DOCKER_BIN"
             docker --version
@@ -165,7 +166,7 @@ stage('Docker image build') {
                 echo 'Deploying the existing Compose frontend and backend services.'
                 powershell '''
                     $ErrorActionPreference = 'Stop'
-                    $env:Path = "$env:DOCKER_BIN;$env:Path"
+                    $env:Path = "$env:DOCKER_BIN;$env:DOCKER_COMPOSE_BIN;$env:Path"
 
                     Write-Host "Docker location: $env:DOCKER_BIN"
                     docker --version
